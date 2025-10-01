@@ -1,0 +1,4 @@
+region="eu-west-1"
+bucket="ims-terraform-infrastructure-state-sandbox"
+dynamodb_table = "ims-terraform-infrastructure-state-lock-sandbox"
+key = demo-jf-dev.tfstate
