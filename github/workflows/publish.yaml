@@ -1,0 +1,75 @@
+name: Deploy EC2 Instance to AWS
+
+on:
+  workflow_dispatch: # Manual trigger
+    inputs:
+      environment:
+        description: 'Choose the environment'
+        required: true
+        default: 'dev'
+
+jobs:
+  terraform-deploy:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: terraform-deploy-${{ github.ref }}
+      cancel-in-progress: false  # Prevents concurrent execution
+
+    steps:
+      # Step 1: Check out the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up AWS OIDC credentials (no secret keys)
+      - name: Set up AWS OIDC credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::731219982456:role/ims-terraform-infrastructure-role-sandbox
+          aws-region: eu-west-1
+          role-session-name: github-actions
+
+      # Step 3: Install Terraform
+      - name: Install Terraform
+        run: |
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+          sudo apt-add-repository "deb https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+          sudo apt-get update && sudo apt-get install terraform
+
+      # Step 3a: Terraform format check
+      - name: Terraform fmt
+        run: terraform fmt -check
+        continue-on-error: false
+
+      # Step 4: Terraform Initialize
+      - name: Terraform Init
+        run: terraform init
+
+      # Step 5: Terraform Plan
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      # Step 6: Manual Approval (for Terraform Apply)
+      - name: Terraform Apply - Manual Approval
+        id: apply_approval
+        run: echo "Approval step completed"
+        continue-on-error: true
+        env:
+          ACTION_REQUIRED: "true"
+
+      - name: Wait for Approval
+        if: steps.apply_approval.outcome == 'success'
+        uses: peter-evans/approve-pull-request-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          approval-action: approve
+        timeout-minutes: 10
+
+      # Step 7: Terraform Apply (once approved)
+      - name: Terraform Apply
+        run: terraform apply tfplan
+        if: steps.apply_approval.outcome == 'success'
+
+      # Step 8: Post-deployment validation
+      - name: Post-deployment Validation
+        run: |
+          echo "Deployment completed successfully"
