@@ -56,13 +56,13 @@ jobs:
         env:
           ACTION_REQUIRED: "true"
 
-      - name: Wait for Approval
-        if: steps.apply_approval.outcome == 'success'
-        uses: sandpit-tf-backend/approve-pull-request-action@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          approval-action: approve
-        timeout-minutes: 10
+      # - name: Wait for Approval
+      #   if: steps.apply_approval.outcome == 'success'
+      #   uses: sandpit-tf-backend/approve-pull-request-action@v4
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     approval-action: approve
+      #   timeout-minutes: 10
 
       # Step 7: Terraform Apply (once approved)
       - name: Terraform Apply
