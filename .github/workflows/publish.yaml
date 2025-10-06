@@ -6,7 +6,7 @@ on:
       environment:
         description: 'Choose the environment'
         required: true
-        default: 'dev'
+        default: 'sandpit'
 
 jobs:
   terraform-deploy:
