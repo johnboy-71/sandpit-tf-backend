@@ -88,3 +88,6 @@ jobs:
 #  pull_request:
 #    branches: [main]
 #    types: ['opened', 'reopened', 'synchronize', 'ready_for_review']
+
+      - name: Configure Git for private modules
+        run: git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
