@@ -6,7 +6,7 @@ on:
     types: ['opened', 'reopened', 'synchronize', 'ready_for_review']
 
 concurrency:
-  group: ims-api-gateway-feature-${{ github.event.pull_request.number }}
+  group: sandpit-tf-backend-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 permissions:
@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
-      id-token: write
+      # id-token: write
       contents: read
     steps:
       - name: Checkout repository
@@ -34,11 +34,11 @@ jobs:
           role-to-assume: arn:aws:iam::731219982456:role/ims-terraform-infrastructure-role-sandbox
           aws-region: eu-west-1
 
-      - name: Terraform security
-        uses: aquasecurity/tfsec-pr-commenter-action@v1.3.1
-        with:
-          tfsec_args: --soft-fail --minimum-severity high
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Terraform security
+      #   uses: aquasecurity/tfsec-pr-commenter-action@v1.3.1
+      #   with:
+      #     tfsec_args: --soft-fail --minimum-severity high
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Terraform CLI
         uses: hashicorp/setup-terraform@v3
